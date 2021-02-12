@@ -10,16 +10,16 @@ module.exports = {
   Client
 }
 
-function Server (id, clients = new Map(), storage = new Storage(), cb) {
+function Server (id, clients = new Map(), storage = new Storage(), opts = {}) {
   const backup = new backpack(id, clients, storage)
 
-  return net.createServer(socket => {
+  const connect = opts.connect || net.createServer
+
+  return connect(socket => {
     socket.once('data', parseRequest)
 
     function parseRequest (msg) {
-      console.log(msg)
       const req = JSON.parse(msg)
-      console.log(req)
 
       assert(req.method.slice(0, 8) === 'BACKPACK', 'unrecognised message.')
 
@@ -45,7 +45,9 @@ function Server (id, clients = new Map(), storage = new Storage(), cb) {
   })
 }
 
-function Client (username, password) {
+function Client (username, password, opts = {}) {
+  const connect = opts.connect || _connect
+
   return {
     register,
     store,
@@ -53,65 +55,49 @@ function Client (username, password) {
   }
 
   function register (server, cb) {
-    connect(server, 'register', cb)
+    connect(server, transport => {
+      const data = Buffer.from(Spake.ClientSide.register(password))
+      const request = {
+        method: 'BACKPACK_REGISTER',
+        username,
+        data
+      }
+
+      transport.req.write(JSON.stringify(request))
+      cb()
+    })
   }
 
   function store (server, cb) {
-    return connect(server,'store', cb)
+    return _stream(server, 'BACKPACK_STORE', cb)
   }
 
   function retrieve (server, cb) {
-    return connect(server, 'retrieve', cb)
+    return _stream(server, 'BACKPACK_RETRIEVE', cb)
   }
 
-  function _register (client) {
-    const data = Buffer.from(Spake.ClientSide.register(password))
+  function _stream (server, method, cb) {
+    connect(server, transport => {
+      let channel = new SpakeChannel.Client({ username, password }, server, transport)
 
-    return {
-      method: 'BACKPACK_REGISTER',
-      username,
-      data
-    }
-  }
+      transport.req.write(JSON.stringify({
+        method,
+        username
+      }))
 
-  function _stream (serverId, client, method, cb) {
-    let channel = new SpakeChannel.Client({ username, password }, { serverId }, {
-      req: client,
-      res: client
+      return cb(channel)
     })
-
-    client.write(JSON.stringify({
-      method,
-      username
-    }))
-
-    cb(channel)
   }
 
-  function connect (server, op, cb) {
-    if (typeof op === 'function') return connect(server, null, op)
-
-    const method = 'BACKPACK_' + op.toUpperCase()
-
-    console.log(cb)
+  function _connect (server, cb) {
     const client = new net.Socket()
     client.connect(server.port, () => {
-      switch (op) {
-        case 'register':
-          client.write(JSON.stringify(_register()))
-          return cb()
-
-        case 'store' :
-          _stream(server.id, client, method, cb)
-          break
-
-        case 'retrieve' :
-          _stream(server.id, client, method, cb)
-          break
-
-        default :
-          return
+      const transport = {
+        req: client,
+        res: client
       }
+
+      return cb(transport)
     })
   }
 }

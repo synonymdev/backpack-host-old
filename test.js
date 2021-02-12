@@ -63,7 +63,7 @@ process.stdin.on('data', function (data) {
 
   const client2 = new net.Socket()
   client2.connect(5432, () => {
-    const channel = new SpakeChannel.Client({ username: uname, password: pwd }, { serverId }, { req: client2, res: client2 })
+    const channel = new SpakeChannel.Client({ username: uname, password: pwd }, serverInfo, { req: client2, res: client2 })
     channel.pipe(out)
     msg = {
       method: 'BACKPACK_RETRIEVE',
