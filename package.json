@@ -1,0 +1,26 @@
+{
+  "name": "backpack-host",
+  "version": "0.0.0",
+  "description": "backpack back-up service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/backpack-host.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/synonymdev/backpack-host/issues"
+  },
+  "homepage": "https://github.com/synonymdev/backpack-host#readme",
+  "devDependencies": {
+    "abstract-blob-store": "^3.3.5",
+    "streamx": "^2.10.1"
+  },
+  "dependencies": {
+    "spake2-ee": "0.0.0"
+  }
+}
