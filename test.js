@@ -6,7 +6,6 @@ const streamx = require('streamx')
 
 const Client = require('./client')
 const Backpack = require('./server')
-const rpc = require('./rpc')
 
 const username = 'anon'
 const password = Buffer.from('password')
@@ -27,13 +26,9 @@ const out = new streamx.Duplex({
 })
 
 const backpack = new Backpack(serverInfo.id, new Map(), new Storage())
-const onrequest = rpc.bind(backpack)
 
 const server = backpack.createServer({
   connect: net.createServer
-}, function (err, channel) {
-  if (err) throw err
-  channel.once('data', onrequest(channel))
 })
 
 server.listen(serverInfo.port)

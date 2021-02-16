@@ -6,14 +6,14 @@ Host for "Backups with password-authenticated cryptographic key servers" based o
 ```js
 const { Host, Client } = require('backpack-host')
 
-
 const backpack = new Host(hostId, new Map(), new Storage())
 const server = backpack.createServer({
   connect: function (onsocket) {
     // logic to establish a connection
   }
-}, function onrequest (msg) {
+}, function onrequest (req, channel, cb) {
   // handle JSON request here
+  cb()
 })
 
 // tcp default
@@ -46,7 +46,11 @@ Instantiate a new Host, with `id` given as a Buffer or Uint8Array.
 
 Create a new server to listen for incoming connections. Default connection is made using `net.createServer`, but conncetion logic may be specified by `opts.connect`.
 
-`onrequest` should be a callback function specifying the RPC logic for the server. A defualt RPC provides the following methods:
+`onrequest` should be a callback function specifying the RPC logic for the server. `onrequest` should have the signature: `function (req, channel, cb)`, and `cb` MUST be called after each request has finished 
+
+**NOTE**: for upload/download events, cb should be called AFTER the uploadl/download stream has fully closed.
+
+A defualt RPC provides the following methods:
 ```
 BACKPACK_STORE
 BACKPACK_RETRIEVE

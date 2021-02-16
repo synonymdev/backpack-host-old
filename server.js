@@ -1,6 +1,7 @@
 const SpakeChannel = require('spake2-peer/spake')
 const assert = require('nanoassert')
 const pump = require('pump')
+const rpc = require('./rpc')
 
 module.exports = class Server {
   constructor (id, clients, storage) {
@@ -12,11 +13,12 @@ module.exports = class Server {
     this.storage = storage
   }
 
-  createServer (opts = {}, cb) {
+  createServer (opts = {}, onrequest) {
     const self = this
 
-    const connect = opts.connect
+    if (!onrequest) onrequest = rpc.bind(this)
 
+    const connect = opts.connect
     return connect(onconnection)
 
     function onconnection (socket) {
@@ -25,7 +27,7 @@ module.exports = class Server {
 
         switch (method) {
           case 'BACKPACK_CONNECT' :
-            self._connect(username, socket, cb)
+            self._connect(username, socket, onchannel)
             break
 
           case 'BACKPACK_REGISTER' :
@@ -33,6 +35,20 @@ module.exports = class Server {
             break
         }
       })
+    }
+
+    function onchannel (err, channel) {
+      if (err) return cb(err)
+      channel.once('data', ondata)
+
+      function ondata (data) {
+        const req = JSON.parse(data)
+
+        onrequest(req, channel, (err) => {
+          if (err) onerror(err)
+          channel.once('data', ondata)
+        })
+      }
     }
   }
 
