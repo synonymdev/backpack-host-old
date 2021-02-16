@@ -3,7 +3,7 @@ const assert = require('nanoassert')
 const pump = require('pump')
 const rpc = require('./rpc')
 
-module.exports = class Server {
+module.exports = class Host {
   constructor (id, clients, storage) {
     assert(typeof clients.get === 'function')
     assert(typeof clients.set === 'function')
