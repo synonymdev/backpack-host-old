@@ -17,9 +17,9 @@ module.exports = class Server {
 
     const connect = opts.connect
 
-    return connect(onsocket)
+    return connect(onconnection)
 
-    function onsocket (socket) {
+    function onconnection (socket) {
       socket.once('data', msg => {
         const { method, username, data } = JSON.parse(msg)
 

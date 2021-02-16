@@ -64,15 +64,13 @@ process.stdin.on('data', function (data) {
     case '1' :
       client.retrieve(serverInfo, (err, channel) => {
         if (err) throw err
-        channel.on('data', console.log)
         channel.pipe(out)
       })
       break
 
     case '2' :
-      client.retrieve(serverInfo, (err, channel) => {
+      client2.retrieve(serverInfo, (err, channel) => {
         if (err) throw err
-        channel.on('data', console.log)
         channel.pipe(out)
       })
       break
