@@ -1,16 +1,17 @@
-const assert = require('nanoassert')
 const net = require('net')
 const fs = require('fs')
-const SpakeChannel = require('spake2-peer/spake')
 
-const { Server, Client } = require('./tcp')
-const serverId = Buffer.from('server1')
+const Storage = require('abstract-blob-store')
 const streamx = require('streamx')
 
-const username = Buffer.from('anon')
+const Client = require('./client')
+const Backpack = require('./server')
+const rpc = require('./rpc')
+
+const username = 'anon'
 const password = Buffer.from('password')
 
-const username2 = Buffer.from('anon2')
+const username2 = 'anon2'
 const password2 = Buffer.from('password2')
 
 const serverInfo = {
@@ -25,51 +26,55 @@ const out = new streamx.Duplex({
   }
 })
 
-const server = Server(serverId)
-server.listen(serverInfo.port)
+const backpack = new Backpack(serverInfo.id, new Map(), new Storage())
+const onrequest = rpc.bind(backpack)
 
-client = new Client(username, password)
-client2 = new Client(username2, password2)
-
-client.register(serverInfo, () => {
-  client.store(serverInfo, (str) => {
-    fs.createReadStream('./samples/1.txt').pipe(str)
-  })
+const server = backpack.createServer({
+  connect: net.createServer
+}, function (err, channel) {
+  if (err) throw err
+  channel.once('data', onrequest(channel))
 })
 
-client2.register(serverInfo, () => {
-  client2.store(serverInfo, (str) => {
-    fs.createReadStream('./samples/2.txt').pipe(str)
+server.listen(serverInfo.port)
+
+const client = new Client(username, password)
+const client2 = new Client(username2, password2)
+
+setTimeout(() => {
+  client.register(serverInfo, (err) => {
+    if (err) throw err
+    client.store(serverInfo, (err, str) => {
+      if (err) throw err
+      fs.createReadStream('./samples/1.txt').pipe(str)
+    })
+  })
+
+  client2.register(serverInfo, (err) => {
+    if (err) throw err
+    client2.store(serverInfo, (err, str) => {
+      if (err) throw err
+      fs.createReadStream('./samples/2.txt').pipe(str)
+    })
   })
 })
 
 process.stdin.on('data', function (data) {
-  let uname, pwd;
-
   switch (data.toString()[0]) {
     case '1' :
-      uname = username
-      pwd = password
+      client.retrieve(serverInfo, (err, channel) => {
+        if (err) throw err
+        channel.on('data', console.log)
+        channel.pipe(out)
+      })
       break
 
     case '2' :
-      uname = username2
-      pwd = password2
+      client.retrieve(serverInfo, (err, channel) => {
+        if (err) throw err
+        channel.on('data', console.log)
+        channel.pipe(out)
+      })
       break
-
-    default :
-      return
   }
-
-  const client2 = new net.Socket()
-  client2.connect(5432, () => {
-    const channel = new SpakeChannel.Client({ username: uname, password: pwd }, serverInfo, { req: client2, res: client2 })
-    channel.pipe(out)
-    msg = {
-      method: 'BACKPACK_RETRIEVE',
-      username: uname
-    }
-
-    client2.write(JSON.stringify(msg))
-  })
 })
