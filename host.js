@@ -3,7 +3,8 @@ const assert = require('nanoassert')
 const pump = require('pump')
 
 const rpc = require('./rpc')
-const Decode = require('./frame')
+const { decode } = require('./wire')
+const Reader = require('./reader')
 
 module.exports = class Host {
   constructor (id, clients, storage) {
@@ -24,23 +25,23 @@ module.exports = class Host {
     const connect = opts.connect
 
     return connect(socket => {
-      const recv = new Decode()
+      const recv = new Reader() // parse framing
 
       pump(socket, recv)
-
       recv.on('data', onmessage)
 
       function onmessage (msg) {
-        const { method, username, data } = JSON.parse(msg)
-
-        switch (method) {
+        const message = decode(msg)
+        switch (message.method) {
+          // connect is used to establish a secure channel
           case 'BACKPACK_CONNECT' :
-            self._connect(username, socket, onchannel)
+            self._connect(message.username, socket, onchannel)
             recv.removeListener('data', onmessage)
             break
 
+          // onetime user registration
           case 'BACKPACK_REGISTER' :
-            self.register(username, data)
+            self.register(message)
             break
         }
       }
@@ -52,9 +53,10 @@ module.exports = class Host {
 
       function ondata (data) {
         try {
-          const req = JSON.parse(data)
+          const req = parseJSON(new Uint8Array(data))
           onrequest(req, channel, onerror)
         } catch (e) {
+          // ignore backup data
           if (e.name !== 'SyntaxError') return onerror(err)
         }
       }
@@ -65,12 +67,11 @@ module.exports = class Host {
     }
   }
 
-  register (username, info) {
-    this.clients.set(username, info)
+  register ({ username, data }) {
+    this.clients.set(username, data)
   }
 
   download (username, res, cb) {
-    console.log(username)
     if (!cb) cb = noop
 
     const str = this.storage.createReadStream(username)
@@ -88,13 +89,19 @@ module.exports = class Host {
     const id = this.id
     const data = this.clients.get(username)
 
+    // spake module handles the handshake
     const channel = new SpakeChannel.Server({ id }, {
       username,
       data
-    }, { res: connection, req: connection })
+    }, connection)
 
     cb(null, channel)
   }
 }
 
 function noop () {}
+
+function parseJSON (buf) {
+  const str = new TextDecoder().decode(buf)
+  return JSON.parse(str)
+}

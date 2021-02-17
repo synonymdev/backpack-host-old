@@ -1,6 +1,7 @@
 const { Transform } = require('streamx')
+const bint = require('bint8array')
 
-module.exports = class Decode extends Transform {
+module.exports = class Reader extends Transform {
   constructor () {
     super()
 
@@ -12,7 +13,7 @@ module.exports = class Decode extends Transform {
   _transform (data, cb) {
     while (data.byteLength > 0) {
       if (this._buffered) {
-        data = Buffer.concat([this._buffered, data])
+        data = bint.concat([this._buffered, data])
         this._buffered = null
       }
 
@@ -20,7 +21,7 @@ module.exports = class Decode extends Transform {
         this._buffered = data
         return cb()
       }
-      
+
       if (this._readingFrame) {
         this._readingFrame = false
         const view = new DataView(data.buffer, data.byteOffset)
@@ -29,8 +30,8 @@ module.exports = class Decode extends Transform {
         continue
       }
 
-      const message = data.slice(0, this._missing)
-      data = data.slice(this._missing)
+      const message = new Uint8Array(data.slice(0, this._missing))
+      data = new Uint8Array(data.slice(this._missing))
 
       this._missing = 2
       this._buffered = null

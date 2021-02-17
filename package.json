@@ -21,6 +21,7 @@
     "streamx": "^2.10.1"
   },
   "dependencies": {
+    "bint8array": "^1.1.1",
     "spake2-ee": "0.0.0",
     "spake2-peer": "0.0.0"
   }

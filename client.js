@@ -1,6 +1,7 @@
 const net = require('net')
 const Spake = require('spake2-ee')
 const SpakeChannel = require('spake2-peer/spake')
+const { RegisterMessage, ConnectMessage } = require('./wire')
 
 module.exports = function Client (username, password, opts = {}) {
   const details = { username, password }
@@ -16,14 +17,10 @@ module.exports = function Client (username, password, opts = {}) {
     connect(server, (err, transport) => {
       if (err) return cb(err)
 
-      const data = Buffer.from(Spake.ClientSide.register(password))
-      const request = {
-        method: 'BACKPACK_REGISTER',
-        username,
-        data
-      }
+      const data = Spake.ClientSide.register(password)
+      const request = new RegisterMessage(username, data)
 
-      transport.write(encode(request))
+      transport.write(frame(request.encode()))
       cb()
     })
   }
@@ -32,7 +29,7 @@ module.exports = function Client (username, password, opts = {}) {
     channel(server, (err, channel) => {
       if (err) return cb(err, channel)
 
-      channel.write(JSON.stringify({
+      channel.write(encode({
         method: 'BACKPACK_STORE',
         username
       }))
@@ -45,7 +42,7 @@ module.exports = function Client (username, password, opts = {}) {
     channel(server, (err, channel) => {
       if (err) return cb(err, channel)
 
-      channel.write(JSON.stringify({
+      channel.write(encode({
         method: 'BACKPACK_RETRIEVE',
         username
       }))
@@ -61,16 +58,12 @@ module.exports = function Client (username, password, opts = {}) {
     connect(server, (err, transport) => {
       if (err) return cb(err)
 
-      transport.write(encode({
-        method: 'BACKPACK_CONNECT',
-        username
-      }))
+      const request = new ConnectMessage(username)
+      transport.write(frame(request.encode()))
 
       try {
-        const channel = new SpakeChannel.Client(details, server, {
-          req: transport,
-          res: transport
-        })
+        // spake module handles handshake
+        const channel = new SpakeChannel.Client(details, server, transport)
         cb(null, channel)
       } catch (e) {
         cb(e)
@@ -87,11 +80,15 @@ module.exports = function Client (username, password, opts = {}) {
   }
 }
 
-function encode (json) {
-  const string = JSON.stringify(json)
-  const buf = Buffer.alloc(2 + string.length)
-  buf.writeUInt16LE(string.length)
-  buf.write(string, 2)
+function frame (buf) {
+  const ret = new Uint8Array(2 + buf.length)
+  const view = new DataView(ret.buffer, ret.byteOffset)
+  view.setUint16(0, buf.length, true)
+  ret.set(buf, 2)
 
-  return buf
+  return ret
+}
+
+function encode (json) {
+  return new TextEncoder().encode(JSON.stringify(json))
 }

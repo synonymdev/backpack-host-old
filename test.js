@@ -20,7 +20,7 @@ const serverInfo = {
 
 const out = new streamx.Duplex({
   write (data, cb) {
-    console.log(data.toString())
+    console.log(Buffer.from(data).toString())
     cb()
   }
 })
