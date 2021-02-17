@@ -23,7 +23,7 @@ module.exports = function Client (username, password, opts = {}) {
         data
       }
 
-      transport.write(JSON.stringify(request))
+      transport.write(encode(request))
       cb()
     })
   }
@@ -61,7 +61,7 @@ module.exports = function Client (username, password, opts = {}) {
     connect(server, (err, transport) => {
       if (err) return cb(err)
 
-      transport.write(JSON.stringify({
+      transport.write(encode({
         method: 'BACKPACK_CONNECT',
         username
       }))
@@ -85,4 +85,13 @@ module.exports = function Client (username, password, opts = {}) {
       return cb(null, client)
     })
   }
+}
+
+function encode (json) {
+  const string = JSON.stringify(json)
+  const buf = Buffer.alloc(2 + string.length)
+  buf.writeUInt16LE(string.length)
+  buf.write(string, 2)
+
+  return buf
 }

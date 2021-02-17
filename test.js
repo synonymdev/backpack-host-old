@@ -5,7 +5,7 @@ const Storage = require('abstract-blob-store')
 const streamx = require('streamx')
 
 const Client = require('./client')
-const Backpack = require('./server')
+const Backpack = require('./host')
 
 const username = 'anon'
 const password = Buffer.from('password')
