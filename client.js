@@ -1,11 +1,10 @@
-const net = require('net')
 const Spake = require('spake2-ee')
 const SpakeChannel = require('handshake-peer/spake')
 const { RegisterMessage, ConnectMessage } = require('./wire')
 
 module.exports = function Client (username, password, opts = {}) {
   const details = { username, password }
-  const connect = opts.connect || _connect
+  const connect = opts.connect
 
   return {
     register,
@@ -68,14 +67,6 @@ module.exports = function Client (username, password, opts = {}) {
       } catch (e) {
         cb(e)
       }
-    })
-  }
-
-  function _connect (server, cb) {
-    const client = new net.Socket()
-    client.connect(server.port, (err) => {
-      if (err) return cb(err)
-      return cb(null, client)
     })
   }
 }
