@@ -1,6 +1,6 @@
 const net = require('net')
 const Spake = require('spake2-ee')
-const SpakeChannel = require('spake2-peer/spake')
+const SpakeChannel = require('handshake-peer/spake')
 const { RegisterMessage, ConnectMessage } = require('./wire')
 
 module.exports = function Client (username, password, opts = {}) {

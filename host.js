@@ -1,4 +1,4 @@
-const SpakeChannel = require('spake2-peer/spake')
+const SpakeChannel = require('handshake-peer/spake')
 const assert = require('nanoassert')
 const pump = require('pump')
 
