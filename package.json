@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "backpack back-up service",
   "main": "index.js",
+  "react-native": {
+    "sodium-native": "react-native-libsodium"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,7 +25,7 @@
   },
   "dependencies": {
     "bint8array": "^1.1.1",
-    "handshake-peer": "0.0.0",
-    "spake2-ee": "0.0.1"
+    "handshake-peer": "git+ssh://git@github.com/hyperdivision/handshake-peer.git",
+    "spake2-ee": "git+ssh://git@github.com/hyperdivision/spake2-ee.git"
   }
 }
