@@ -12,8 +12,11 @@ module.exports = function Client (username, password, opts = {}) {
     retrieve
   }
 
-  function register (server, cb) {
-    connect(server, (err, transport) => {
+  function register (server, opts, cb) {
+    if (isFunction(opts)) return register(server, {}, opts)
+
+    const _connect = opts.connect || connect
+    _connect(server, (err, transport) => {
       if (err) return cb(err)
 
       const data = Spake.ClientSide.register(password)
@@ -24,9 +27,11 @@ module.exports = function Client (username, password, opts = {}) {
     })
   }
 
-  function store (server, cb) {
-    channel(server, (err, channel) => {
-      if (err) return cb(err, channel)
+  function store (server, opts, cb) {
+    if (isFunction(opts)) return store(server, {}, opts)
+
+    channel(server, opts, (err, channel) => {
+      if (err) return cb(err)
 
       channel.write(encode({
         method: 'BACKPACK_STORE',
@@ -37,9 +42,11 @@ module.exports = function Client (username, password, opts = {}) {
     })
   }
 
-  function retrieve (server, cb) {
-    channel(server, (err, channel) => {
-      if (err) return cb(err, channel)
+  function retrieve (server, opts, cb) {
+    if (isFunction(opts)) return retrieve(server, {}, opts)
+
+    channel(server, opts, (err, channel) => {
+      if (err) return cb(err)
 
       channel.write(encode({
         method: 'BACKPACK_RETRIEVE',
@@ -51,7 +58,7 @@ module.exports = function Client (username, password, opts = {}) {
   }
 
   function channel (server, opts, cb) {
-    if (typeof opts === 'function') return channel(server, {}, opts)
+    if (isFunction(opts)) return channel(server, {}, opts)
 
     const _connect = opts.connect || connect
     _connect(server, (err, transport) => {
@@ -82,4 +89,8 @@ function frame (buf) {
 
 function encode (json) {
   return new TextEncoder().encode(JSON.stringify(json))
+}
+
+function isFunction (obj) {
+  return typeof obj === 'function'
 }

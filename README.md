@@ -74,27 +74,40 @@ Reads from `req` and stores the data under the user.
 
 #### const user = new Client(username, password, opts)
 
-Instantiate a new client instance with the given `username` and `password`. `username` should be a string and `password` should be a Buffer.
+Instantiate a new client instance with the given `username` and `password`. `username` and `password` should be Buffers.
 
-Connection logic may be specified by `opts.connect`.
+Default connection logic for the client may be specified via `opts.connect`:
+```js
+{
+  connect: (serverInfo, cb) => {
+    // implement connection logic
+  }
+}
+```
 
-#### user.register(serverDetails, cb)
+#### user.register(serverDetails, [opts], cb)
 
 Register this user with a given server. `serverDetails` should contain the info expected by the clients `connect` method.
 
-#### user.store(serverDetails, cb)
+Connection logic is configurable by passing in `opts.connect`.
+
+#### user.store(serverDetails, [opts], cb)
 
 Returns a stream to write data to be stored on the remote server. `serverDetails` should contain the info expected by the clients `connect` method.
 
 Upon successful handshake completion, callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
 
-#### user.retrieve(serverDetails, cb)
+Connection logic is configurable by passing in `opts.connect`.
+
+#### user.retrieve(serverDetails, [opts], cb)
 
 Return a stream of this users stored data from the remote server. `serverDetails` should contain the info expected by the clients `connect` method.
 
 Upon successful handshake completion, callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
 
-#### user.channel(serverDetails, opts, cb)
+Connection logic is configurable by passing in `opts.connect`.
+
+#### user.channel(serverDetails, [opts], cb)
 
 Establish a secure channel with the server. `serverDetails` should contain the info expected by the clients `connect` method. Callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
 
