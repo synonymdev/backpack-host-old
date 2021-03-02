@@ -53,8 +53,8 @@ module.exports = function Client (username, password, opts = {}) {
   function channel (server, opts, cb) {
     if (typeof opts === 'function') return channel(server, {}, opts)
 
-    const connect = opts.connect || _connect
-    connect(server, (err, transport) => {
+    const _connect = opts.connect || connect
+    _connect(server, (err, transport) => {
       if (err) return cb(err)
 
       const request = new ConnectMessage(username)

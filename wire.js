@@ -116,8 +116,7 @@ function decodeUsername (buf, offset) {
   const len = getLengthPrefix(buf, offset)
   offset += getLengthPrefix.bytes
 
-  const dec = new TextDecoder()
-  const username = dec.decode(buf.subarray(offset, offset + len))
+  const username = buf.subarray(offset, offset + len)
   offset += len
 
   decodeUsername.bytes = offset - startIndex
@@ -129,12 +128,11 @@ function encodeUsername (username, buf, offset) {
   if (!offset) offset = 0
   const startIndex = offset
 
-  setLengthPrefix(username.length, buf, offset)
+  setLengthPrefix(username.byteLength, buf, offset)
   offset += setLengthPrefix.bytes
 
-  const enc = new TextEncoder()
-  const stats = enc.encodeInto(username, buf.subarray(offset))
-  offset += stats.written
+  buf.set(username, offset)
+  offset += username.byteLength
 
   encodeUsername.bytes = offset - startIndex
   return buf

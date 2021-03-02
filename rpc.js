@@ -1,11 +1,11 @@
 module.exports = function onrequest (req, channel, cb) {
   switch (req.method) {
     case 'BACKPACK_RETRIEVE':
-      this.download(req.username, channel, cb)
+      this.download(req.username.toString(), channel, cb)
       break
 
     case 'BACKPACK_STORE':
-      this.upload(req.username, channel, cb)
+      this.upload(req.username.toString(), channel, cb)
       break
 
     default :

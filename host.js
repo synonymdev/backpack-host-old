@@ -68,7 +68,7 @@ module.exports = class Host {
   }
 
   register ({ username, data }) {
-    this.clients.set(username, data)
+    this.clients.set(username.toString(), data)
   }
 
   download (username, res, cb) {
@@ -87,7 +87,7 @@ module.exports = class Host {
 
   _connect (username, connection, cb) {
     const id = this.id
-    const data = this.clients.get(username)
+    const data = this.clients.get(username.toString())
 
     // spake module handles the handshake
     const channel = new SpakeChannel.Server({ id }, {
