@@ -16,6 +16,7 @@ function decode (buf, offset) {
       throw new Error('Unrecognised message flag.')
   }
 }
+
 class ConnectMessage {
   constructor (username) {
     this.method = 'BACKPACK_CONNECT'
