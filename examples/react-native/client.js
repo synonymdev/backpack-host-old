@@ -2,6 +2,10 @@
  * @format
  */
 
+// we need to shim these
+global.process = require('process')
+global.process.nextTick = setImmediate
+
 import {AppRegistry} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
