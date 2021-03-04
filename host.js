@@ -4,7 +4,7 @@ const pump = require('pump')
 
 const rpc = require('./rpc')
 const { decode } = require('./wire')
-const Reader = require('./reader')
+const read = require('./reader')
 
 module.exports = class Host {
   constructor (id, clients, storage) {
@@ -25,15 +25,12 @@ module.exports = class Host {
     const connect = opts.connect
 
     return connect(socket => {
-      const recv = new Reader() // parse framing
-
-      pump(socket, recv)
-      recv.on('data', onmessage)
+      read(socket, onmessage)
 
       function onmessage (msg) {
         const message = decode(msg)
         switch (message.method) {
-          // connect is used to establish a secure channel
+          // establish a secure channel
           case 'BACKPACK_CONNECT' :
             self._connect(message.username, socket, onchannel)
             recv.removeListener('data', onmessage)
@@ -56,7 +53,7 @@ module.exports = class Host {
           const req = parseJSON(new Uint8Array(data))
           onrequest(req, channel, onerror)
         } catch (e) {
-          // ignore backup data
+          // ignore data passed to be stored
           if (e.name !== 'SyntaxError') return onerror(err)
         }
       }
