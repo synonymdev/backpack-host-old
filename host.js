@@ -33,7 +33,6 @@ module.exports = class Host {
           // establish a secure channel
           case 'BACKPACK_CONNECT' :
             self._connect(message.username, socket, onchannel)
-            recv.removeListener('data', onmessage)
             break
 
           // onetime user registration
