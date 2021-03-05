@@ -15,7 +15,7 @@ import bint from 'bint8array';
 import { Readable, Duplex } from 'streamx';
 
 import webnet from 'webnet';
-import WSStream from './websocket.js';
+import WSStream from 'webnet/websocket';
 
 const username = bint.fromString('anon')
 const password = bint.fromString('password')
