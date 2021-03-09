@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "bint8array": "^1.1.1",
-    "handshake-peer": "git+ssh://git@github.com/hyperdivision/handshake-peer.git",
-    "spake2-ee": "git+ssh://git@github.com/hyperdivision/spake2-ee.git"
+    "handshake-peer": "0.0.1",
+    "spake2-ee": "^0.1.0"
   }
 }
