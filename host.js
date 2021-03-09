@@ -3,7 +3,7 @@ const assert = require('nanoassert')
 const pump = require('pump')
 
 const rpc = require('./rpc')
-const { decode } = require('./wire')
+const { decode, RPC } = require('./wire')
 const read = require('./reader')
 
 module.exports = class Host {
@@ -31,12 +31,12 @@ module.exports = class Host {
         const message = decode(msg)
         switch (message.method) {
           // establish a secure channel
-          case 'BACKPACK_CONNECT' :
+          case 'CONNECT' :
             self._connect(message.username, socket, onchannel)
             break
 
           // onetime user registration
-          case 'BACKPACK_REGISTER' :
+          case 'REGISTER' :
             self.register(message)
             break
         }
@@ -45,15 +45,26 @@ module.exports = class Host {
 
     function onchannel (err, channel) {
       if (err) return onerror(err)
-      channel.on('data', ondata)
 
-      function ondata (data) {
-        try {
-          const req = parseJSON(new Uint8Array(data))
+      readRequest()
+
+      function readRequest () {
+        const data = channel.read()
+
+        if (data === null) {
+          channel.once('readable', readRequest)
+          return
+        }
+
+        const req = {
+          method: RPC.METHODS[data[0]],
+          username: channel.remoteInfo.username.toString()
+        }
+
+        if (req.method) {
           onrequest(req, channel, onerror)
-        } catch (e) {
-          // ignore data passed to be stored
-          if (e.name !== 'SyntaxError') return onerror(err)
+        } else {
+          channel.unshift(data)
         }
       }
     }

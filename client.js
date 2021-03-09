@@ -1,7 +1,7 @@
 const Spake = require('spake2-ee')
 const SpakeChannel = require('handshake-peer/spake')
 const bint = require('bint8array')
-const { RegisterMessage, ConnectMessage } = require('./wire')
+const { RegisterMessage, ConnectMessage, RPC } = require('./wire')
 
 module.exports = function Client (username, password, opts = {}) {
   const details = { username, password }
@@ -34,11 +34,7 @@ module.exports = function Client (username, password, opts = {}) {
     channel(server, opts, (err, channel) => {
       if (err) return cb(err)
 
-      channel.write(encode({
-        method: 'BACKPACK_STORE',
-        username
-      }))
-
+      channel.write(RPC.StoreMessage)
       cb(null, channel)
     })
   }
@@ -49,11 +45,7 @@ module.exports = function Client (username, password, opts = {}) {
     channel(server, opts, (err, channel) => {
       if (err) return cb(err)
 
-      channel.write(encode({
-        method: 'BACKPACK_RETRIEVE',
-        username
-      }))
-
+      channel.write(RPC.RetrieveMessage)
       cb(null, channel)
     })
   }

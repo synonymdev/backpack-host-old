@@ -1,15 +1,30 @@
-const CONNECT_FLAG = 0x7e
-const REGISTER_FLAG = 0x7f
+const FLAGS = {
+  CONNECT: 0x7e,
+  REGISTER: 0x7f,
+  STORE: 0x3e,
+  RETRIEVE: 0x3f
+}
+
+// reverse map for decoding
+const METHODS = {}
+for (const [k, v] of Object.entries(FLAGS)) METHODS[v] = k
+
+const RPC = {
+  FLAGS,
+  METHODS,
+  StoreMessage: new Uint8Array([ FLAGS.STORE ]),
+  RetrieveMessage: new Uint8Array([ FLAGS.RETRIEVE ]),
+}
 
 function decode (buf, offset) {
   if (!offset) offset = 0
   const flag = buf[offset++]
 
   switch (flag) {
-    case CONNECT_FLAG:
+    case RPC.FLAGS.CONNECT:
       return ConnectMessage.decode(buf, offset)
 
-    case REGISTER_FLAG:
+    case RPC.FLAGS.REGISTER:
       return RegisterMessage.decode(buf, offset)
 
     default:
@@ -19,7 +34,7 @@ function decode (buf, offset) {
 
 class ConnectMessage {
   constructor (username) {
-    this.method = 'BACKPACK_CONNECT'
+    this.method = 'CONNECT'
     this.username = username
   }
 
@@ -29,7 +44,7 @@ class ConnectMessage {
     const startIndex = offset
 
     // connect flag
-    buf[offset++] = CONNECT_FLAG
+    buf[offset++] = RPC.FLAGS.CONNECT
 
     encodeUsername(this.username, buf, offset)
     offset += encodeUsername.bytes
@@ -56,7 +71,7 @@ class ConnectMessage {
 
 class RegisterMessage {
   constructor (username, data) {
-    this.method = 'BACKPACK_REGISTER'
+    this.method = 'REGISTER'
     this.username = username
     this.data = data
   }
@@ -67,7 +82,7 @@ class RegisterMessage {
     const startIndex = offset
 
     // registration flag
-    buf[offset++] = REGISTER_FLAG
+    buf[offset++] = RPC.FLAGS.REGISTER
 
     encodeUsername(this.username, buf, offset)
     offset += encodeUsername.bytes
@@ -107,7 +122,8 @@ class RegisterMessage {
 module.exports = {
   decode,
   RegisterMessage,
-  ConnectMessage
+  ConnectMessage,
+  RPC
 }
 
 function decodeUsername (buf, offset) {
