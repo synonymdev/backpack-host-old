@@ -67,10 +67,8 @@ module.exports = function Client (username, password, opts = {}) {
         channel.end('error')
         return cb(err)
       })
-      transport.on('close', () => console.log('close'))
-      channel.on('close', () => console.log('end'))
 
-      channel.on('handshake', () => cb(null, channel))
+      cb(null, channel)
     })
   }
 }
