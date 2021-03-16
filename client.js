@@ -60,13 +60,15 @@ module.exports = function Client (username, password, opts = {}) {
       const request = new ConnectMessage(username)
       transport.write(frame(request.encode()))
 
-      try {
-        // spake module handles handshake
-        const channel = new SpakeChannel.Client(details, server, transport)
-        cb(null, channel)
-      } catch (e) {
-        cb(e)
-      }
+      // spake module handles handshake
+      const channel = new SpakeChannel.Client(details, server, transport)
+
+      channel.on('error', err => {
+        channel.end('error')
+        return cb(err)
+      })
+
+      cb(null, channel)
     })
   }
 }

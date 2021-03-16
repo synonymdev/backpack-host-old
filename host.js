@@ -102,6 +102,10 @@ module.exports = class Host {
       data
     }, connection)
 
+    channel.on('error', err => {
+      return cb(err)
+    })
+
     cb(null, channel)
   }
 }
