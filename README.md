@@ -89,7 +89,7 @@ Default connection logic for the client may be specified via `opts.connect`:
 
 Initialise the client. This method derives the encryption and must be called before encryption/decryption.
 
-By default, Argon2d is used with `crypto_pwhash_OPSLIMIT_SENSITIVE` and `crypto_pwhash_MEMLIMIT_SENSITIVE`. Alternative parameters may be specified with `opts`. See [sodium-native](https://sodium-friends.github.io/docs/docs/passwordhashing#crypto_pwhash) for other constants.
+By default, Argon2d is used with `crypto_pwhash_OPSLIMIT_SENSITIVE` and `crypto_pwhash_MEMLIMIT_SENSITIVE`. Alternative parameters may be specified with `opts`. See [sodium-native](https://sodium-friends.github.io/docs/docs/passwordhashing#crypto_pwhash) for other details.
 
 `opts`:
 ```
@@ -98,6 +98,21 @@ By default, Argon2d is used with `crypto_pwhash_OPSLIMIT_SENSITIVE` and `crypto_
   memlimit,
   alg
 }
+```
+
+Constants:
+```
+// ~1s on iOS/Andorid emulator
+crypto_pwhash_OPSLIMIT_INTERACTIVE
+crypto_pwhash_MEMLIMIT_INTERACTIVE
+
+// ~3s on iOS/Andorid emulator
+crypto_pwhash_OPSLIMIT_MODERATE
+crypto_pwhash_MEMLIMIT_MODERATE
+
+// ~10s on iOS/Andorid emulator
+crypto_pwhash_OPSLIMIT_SENSITIVE
+crypto_pwhash_MEMLIMIT_SENSITIVE
 ```
 
 #### `const ciphertext = user.encrypt(plaintext, pad)`
