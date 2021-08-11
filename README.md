@@ -85,7 +85,7 @@ Default connection logic for the client may be specified via `opts.connect`:
 }
 ```
 
-#### `user.init([opts], cb)`
+#### `await user.init([opts])`
 
 Initialise the client. This method derives the encryption and must be called before encryption/decryption.
 
@@ -115,38 +115,20 @@ crypto_pwhash_OPSLIMIT_SENSITIVE
 crypto_pwhash_MEMLIMIT_SENSITIVE
 ```
 
-#### `const ciphertext = user.encrypt(plaintext, pad)`
-
-Encrypt `plaintext` with the user's encryption key. `pad` may be used to define the number of bytes to pad up to, the default is 128kB.
-
-#### `const plaintext = user.decrypt(ciphertext, pad)`
-
-Decrypt `ciphertext` with the user's encryption key. `pad` should correspond to the padding used for encryption, the default is 128kB.
-
-#### `user.register(serverDetails, [opts], cb)`
+#### `await user.register(serverDetails, [opts])`
 
 Register this user with a given server. `serverDetails` should contain the info expected by the clients `connect` method.
 
 Connection logic is configurable by passing in `opts.connect`.
 
-#### `user.store(serverDetails, [opts], cb)`
+#### `await user.store(serverDetails, [opts])`
 
 Returns a stream to write data to be stored on the remote server. `serverDetails` should contain the info expected by the clients `connect` method.
 
-Upon successful handshake completion, callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
-
 Connection logic is configurable by passing in `opts.connect`.
 
-#### `user.retrieve(serverDetails, [opts], cb)`
+#### `const data = await user.retrieve(serverDetails, [opts])`
 
 Return a stream of this users stored data from the remote server. `serverDetails` should contain the info expected by the clients `connect` method.
-
-Upon successful handshake completion, callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
-
-Connection logic is configurable by passing in `opts.connect`.
-
-#### `user.channel(serverDetails, [opts], cb)`
-
-Establish a secure channel with the server. `serverDetails` should contain the info expected by the clients `connect` method. Callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
 
 Connection logic is configurable by passing in `opts.connect`.
