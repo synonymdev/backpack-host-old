@@ -48,32 +48,25 @@ const client = new Client(username, password, {
   }
 })
 
+// client needs to initialise key
+await client.init()
+
 // register the client with the server,
 // client only has to register once
-client.register(serverInfo, (err) => {
-  if (err) throw err
+await client.register(serverInfo)
 
-  // now, or at any later date we can
-  // store data on the remote server
-  client.store(serverInfo, (err, str) => {
-    if (err) throw err
+// some data to write
+const data = new Uint8Array(256)
+for (let i = 0; i < data.byteLength; i++) write[i] = i
 
-    // write some data
-    const data = new Uint8Array(256)
-    for (let i = 0; i < data.byteLength; i++) write[i] = i
-
-    Readable.from(data).pipe(str)
-  })
-})
+// now, or at any later date we can
+// store data on the remote server
+await client.store(serverInfo, data)
 
 // retrieve the data at a later point
-setTimeout(() => {
-  client.retrieve(serverInfo, (err, channel) => {
-    if (err) throw err
-    console.log('receiving...')
-    channel.pipe(out)
-  })
+setTimeout(async () => {
+  const data = await client.retrieve(serverInfo)
+  console.log(data)
 }, 3000)
 
 AppRegistry.registerComponent(appName, () => App);
-
