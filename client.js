@@ -2,15 +2,41 @@ const Spake = require('spake2-ee')
 const SpakeChannel = require('handshake-peer/spake')
 const bint = require('bint8array')
 const { RegisterMessage, ConnectMessage, RPC } = require('./wire')
+const { encrypt, decrypt, createKey } = require('./wire')
 
 module.exports = function Client (username, password, opts = {}) {
   const details = { username, password }
   const connect = opts.connect
+  let key = null
 
   return {
+    init,
+    encryptBackup,
+    decryptBackup,
     register,
     store,
     retrieve
+  }
+
+  function init (opts = {}, cb) {
+    if (typeof opts === 'function') return init(null, opts)
+    if (key !== null) return cb()
+
+    createKey(username, password, opts, (err, res) => {
+      if (err) return cb(err)
+      key = res
+      return cb()
+    })
+  }
+
+  function encryptBackup (plaintext, pad) {
+    if (key === null) throw new Error('Client has not be initialised yet.')
+    return encrypt(key, plaintext, pad)
+  }
+
+  function decryptBackup (ciphertext, pad) {
+    if (key === null) throw new Error('Client has not be initialised yet.')
+    return decrypt(key, ciphertext, pad)
   }
 
   function register (server, opts, cb) {
