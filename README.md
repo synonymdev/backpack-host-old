@@ -115,11 +115,11 @@ crypto_pwhash_OPSLIMIT_SENSITIVE
 crypto_pwhash_MEMLIMIT_SENSITIVE
 ```
 
-#### `const ciphertext = user.encrypt(plaintext, pad)`
+#### `const ciphertext = user.encryptBackup(plaintext, pad)`
 
 Encrypt `plaintext` with the user's encryption key. `pad` may be used to define the number of bytes to pad up to, the default is 128kB.
 
-#### `const plaintext = user.decrypt(ciphertext, pad)`
+#### `const plaintext = user.decryptBackup(ciphertext, pad)`
 
 Decrypt `ciphertext` with the user's encryption key. `pad` should correspond to the padding used for encryption, the default is 128kB.
 
