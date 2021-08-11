@@ -19,7 +19,7 @@ module.exports = function Client (username, password, opts = {}) {
   }
 
   function init (opts = {}, cb) {
-    if (typeof opts === 'function') return init(null, opts)
+    if (typeof opts === 'function') return init(undefined, opts)
     if (key !== null) return cb()
 
     createKey(username, password, opts, (err, res) => {
