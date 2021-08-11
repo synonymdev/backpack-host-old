@@ -11,8 +11,6 @@ module.exports = function Client (username, password, opts = {}) {
 
   return {
     init,
-    encryptBackup,
-    decryptBackup,
     register,
     store,
     retrieve
