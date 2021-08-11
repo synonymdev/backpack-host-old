@@ -2,9 +2,9 @@ const SpakeChannel = require('handshake-peer/spake')
 const assert = require('nanoassert')
 const pump = require('pump')
 
-const rpc = require('./rpc')
-const { decode, RPC } = require('./wire')
-const read = require('./reader')
+const rpc = require('./lib/rpc')
+const { decode, RPC } = require('./lib/wire')
+const read = require('./lib/reader')
 
 module.exports = class Host {
   constructor (id, clients, storage) {
@@ -111,8 +111,3 @@ module.exports = class Host {
 }
 
 function noop () {}
-
-function parseJSON (buf) {
-  const str = new TextDecoder().decode(buf)
-  return JSON.parse(str)
-}

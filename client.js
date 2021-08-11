@@ -1,8 +1,8 @@
 const Spake = require('spake2-ee')
 const SpakeChannel = require('handshake-peer/spake')
 const bint = require('bint8array')
-const { RegisterMessage, ConnectMessage, RPC } = require('./wire')
-const { encrypt, decrypt, createKey } = require('./wire')
+const { RegisterMessage, ConnectMessage, RPC } = require('./lib/wire')
+const { encrypt, decrypt, createKey } = require('./lib/crypto')
 
 module.exports = function Client (username, password, opts = {}) {
   const details = { username, password }
@@ -106,10 +106,6 @@ function frame (buf) {
   ret.set(buf, 2)
 
   return ret
-}
-
-function encode (json) {
-  return new bint.fromString(JSON.stringify(json))
 }
 
 function isFunction (obj) {
