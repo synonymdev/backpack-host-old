@@ -16,16 +16,9 @@ module.exports = function Client (username, password, opts = {}) {
     retrieve
   }
 
-  function init (opts = {}) {
+  async function init (opts = {}) {
     if (key !== null) return
-
-    return new Promise((resolve, reject) => {
-      createKey(username, password, opts, (err, res) => {
-        if (err) return reject(err)
-        key = res
-        resolve()
-      })
-    })
+    key = await createKey(username, password, opts)
   }
 
   function encryptBackup (plaintext, pad = 128) {
