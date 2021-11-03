@@ -34,7 +34,7 @@ client.register(serverInfo, (err) => {
 
 ### Host
 
-#### `const backpack = new Host(id, clients, storage)`
+#### ``const backpack = new Host(id, clients, storage)``
 
 Instantiate a new Host, with `id` given as a Buffer or Uint8Array.
 
@@ -42,7 +42,7 @@ Instantiate a new Host, with `id` given as a Buffer or Uint8Array.
 
 `storage` should be an [blob-store](https://github.com/maxogden/abstract-blob-store) compatible storage module provided by the application. User backups are stored here.
 
-#### `const server = backpack.createServer(opts, onrequest)`
+#### ``const server = backpack.createServer(opts, onrequest)``
 
 Create a new server to listen for incoming connections. Default connection is made using `net.createServer`, but conncetion logic may be specified by `opts.connect`.
 
@@ -56,23 +56,23 @@ BACKPACK_STORE
 BACKPACK_RETRIEVE
 ```
 
-#### `backpack.register(username, info)`
+#### ``backpack.register(username, info)``
 
 Internal method to register a new user.
 
 
-#### `backpack.download(username, res, info)`
+#### ``backpack.download(username, res, info)``
 
 Writes the users requested data into the `res`.
 
 
-#### `backpack.upload(username, req, info)`
+#### ``backpack.upload(username, req, info)``
 
 Reads from `req` and stores the data under the user.
 
 ### Client
 
-#### const user = new Client(username, password, opts)
+#### `const user = new Client(username, password, opts)`
 
 Instantiate a new client instance with the given `username` and `password`. `username` and `password` should be Buffers.
 
@@ -85,30 +85,50 @@ Default connection logic for the client may be specified via `opts.connect`:
 }
 ```
 
-#### user.register(serverDetails, [opts], cb)
+#### `await user.init([opts])`
+
+Initialise the client. This method derives the encryption and must be called before encryption/decryption.
+
+By default, Argon2d is used with `crypto_pwhash_OPSLIMIT_SENSITIVE` and `crypto_pwhash_MEMLIMIT_SENSITIVE`. Alternative parameters may be specified with `opts`. See [sodium-native](https://sodium-friends.github.io/docs/docs/passwordhashing#crypto_pwhash) for other details.
+
+`opts`:
+```
+{
+  opslimit,
+  memlimit,
+  alg
+}
+```
+
+Constants:
+```
+// ~1s on iOS/Andorid emulator
+crypto_pwhash_OPSLIMIT_INTERACTIVE
+crypto_pwhash_MEMLIMIT_INTERACTIVE
+
+// ~3s on iOS/Andorid emulator
+crypto_pwhash_OPSLIMIT_MODERATE
+crypto_pwhash_MEMLIMIT_MODERATE
+
+// ~10s on iOS/Andorid emulator
+crypto_pwhash_OPSLIMIT_SENSITIVE
+crypto_pwhash_MEMLIMIT_SENSITIVE
+```
+
+#### `await user.register(serverDetails, [opts])`
 
 Register this user with a given server. `serverDetails` should contain the info expected by the clients `connect` method.
 
 Connection logic is configurable by passing in `opts.connect`.
 
-#### user.store(serverDetails, [opts], cb)
+#### `await user.store(serverDetails, [opts])`
 
 Returns a stream to write data to be stored on the remote server. `serverDetails` should contain the info expected by the clients `connect` method.
 
-Upon successful handshake completion, callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
-
 Connection logic is configurable by passing in `opts.connect`.
 
-#### user.retrieve(serverDetails, [opts], cb)
+#### `const data = await user.retrieve(serverDetails, [opts])`
 
 Return a stream of this users stored data from the remote server. `serverDetails` should contain the info expected by the clients `connect` method.
-
-Upon successful handshake completion, callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
-
-Connection logic is configurable by passing in `opts.connect`.
-
-#### user.channel(serverDetails, [opts], cb)
-
-Establish a secure channel with the server. `serverDetails` should contain the info expected by the clients `connect` method. Callback will be call with `cb(null, channel)` where `channel` is an E2E encrypted secure channel.
 
 Connection logic is configurable by passing in `opts.connect`.

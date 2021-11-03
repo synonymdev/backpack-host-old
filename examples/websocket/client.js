@@ -16,17 +16,17 @@ const client = new Client(username, password, {
   }
 })
 
-client.register(serverInfo, (err) => {
-  if (err) throw err
-  client.store(serverInfo, (err, str) => {
-    if (err) throw err
-    fs.createReadStream('../sample.txt').pipe(str)
-  })
-})
+main()
 
-process.stdin.on('data', () => {
-  client.retrieve(serverInfo, (err, channel) => {
-    if (err) throw err
-    channel.pipe(process.stdout)
-  })
+async function main () {
+  await client.init()
+  await client.register(serverInfo)
+
+  const data = fs.readFileSync('../sample.txt')
+  await client.store(serverInfo, data)
+}
+
+process.stdin.on('data', async () => {
+  const data = await client.retrieve(serverInfo)
+  console.log(data)
 })

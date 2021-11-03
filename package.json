@@ -26,6 +26,8 @@
   "dependencies": {
     "bint8array": "^1.1.2",
     "handshake-peer": "^0.1.0",
+    "secret-blob": "github:chm-diederichs/secret-blob",
+    "sodium-native": "^3.2.1",
     "spake2-ee": "^0.1.0"
   }
 }
