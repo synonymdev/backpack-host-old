@@ -10,11 +10,11 @@ const serverInfo = {
   url: 'ws://localhost:4000'
 }
 
-const client = new Client(username, password, {
-  connect: (info, cb) => {
+const client = new Client(username, password,
+  function connect (info, cb) {
     cb(null, WebSocket(info.url))
   }
-})
+)
 
 main()
 
@@ -24,9 +24,11 @@ async function main () {
 
   const data = fs.readFileSync('../sample.txt')
   await client.store(serverInfo, data)
-}
 
-process.stdin.on('data', async () => {
-  const data = await client.retrieve(serverInfo)
-  console.log(data)
-})
+  console.log('client is ready!')
+
+  process.stdin.on('data', async () => {
+    const data = await client.retrieve(serverInfo)
+    console.log(data.toString())
+  })
+}

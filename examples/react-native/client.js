@@ -33,11 +33,11 @@ const out = new Duplex({
   }
 })
 
-const client = new Client(username, password, {
+const client = new Client(username, password,
   // a default connect method should be passed
   // to the server; a duplex stream should be
   // passed to the callback.
-  connect: (info, cb) => {
+  function connect (info, cb) {
     const socket = new WebSocket(info.url)
     socket.onerror = err => cb(err)
 
@@ -46,7 +46,7 @@ const client = new Client(username, password, {
       onconnect: () => cb(null, ws)
     })
   }
-})
+)
 
 // client needs to initialise key
 await client.init()

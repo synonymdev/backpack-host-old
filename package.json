@@ -21,7 +21,8 @@
   "homepage": "https://github.com/synonymdev/backpack-host#readme",
   "devDependencies": {
     "abstract-blob-store": "^3.3.5",
-    "streamx": "^2.10.1"
+    "streamx": "^2.10.1",
+    "websocket-stream": "^5.5.2"
   },
   "dependencies": {
     "bint8array": "^1.1.2",

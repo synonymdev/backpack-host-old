@@ -1,12 +1,16 @@
 const Spake = require('spake2-ee')
 const SpakeChannel = require('handshake-peer/spake')
+const assert = require('nanoassert')
 const bint = require('bint8array')
 const { RegisterMessage, ConnectMessage, RPC } = require('./lib/wire')
 const { encrypt, decrypt, createKey } = require('./lib/crypto')
 
-module.exports = function Client (username, password, opts = {}) {
+module.exports = function Client (username, password, connect) {
   const details = { username, password }
-  const connect = opts.connect
+
+  assert(username instanceof Uint8Array, 'Username should be a buffer.')
+  assert(password instanceof Uint8Array, 'Password should be a buffer.')
+
   let key = null
 
   return {
@@ -31,8 +35,12 @@ module.exports = function Client (username, password, opts = {}) {
     return decrypt(key, ciphertext, pad)
   }
 
-  async function register (server, opts = {}) {
+  function register (server, opts = {}) {
     const _connect = opts.connect || connect
+    if (typeof connect !== 'function') {
+      throw new Error('Connection method has not been specified.')
+    }
+
     return new Promise((resolve, reject) => {
       _connect(server, (err, transport) => {
         if (err) return reject(err)
@@ -69,8 +77,11 @@ module.exports = function Client (username, password, opts = {}) {
     return decryptBackup(bint.concat(chunks))
   }
 
-  async function channel (server, opts = {}) {
+  function channel (server, opts = {}) {
     const _connect = opts.connect || connect
+    if (typeof connect !== 'function') {
+      throw new Error('Connection method has not been specified.')
+    }
 
     return new Promise((resolve, reject) => {
       _connect(server, (err, transport) => {
