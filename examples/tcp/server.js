@@ -9,9 +9,7 @@ const serverInfo = {
 
 const backpack = new Host(serverInfo.id, new Map(), new Storage())
 
-const server = backpack.createServer({
-  connect: net.createServer
-})
+const host = backpack.createServer(net.createServer)
 
-server.listen(serverInfo.port)
+host.listen(serverInfo.port)
 

@@ -1,5 +1,8 @@
 # backpack-host
-Host for "Backups with password-authenticated cryptographic key servers" based on SPAKE2+EE https://github.com/jedisct1/spake2-ee
+
+*This is alpha software: this should __not__ be used in production and breaking changes may occur without warning*
+
+An encrypted backup service with using a Password-Authenticated Key Agreement based on SPAKE2+EE https://github.com/jedisct1/spake2-ee, meaning client's passwords are neither transmitted nor stored on the server.
 
 ## Usage
 
@@ -7,27 +10,35 @@ Host for "Backups with password-authenticated cryptographic key servers" based o
 const { Host, Client } = require('backpack-host')
 
 const backpack = new Host(hostId, new Map(), new Storage())
-const server = backpack.createServer({
-  connect: function (onsocket) {
+const server = backpack.createServer(
+  async function connect (onsocket) {
     // logic to establish a connection
-  }
-}, function onrequest (req, channel, cb) {
-  // handle JSON request here
-  cb()
-})
+  },
+  {
+    onrequest (req, channel, cb) {
+      // handle JSON request here
+      cb()
+    }
+  })
 
 // tcp default
 server.listen(port)
 
+// make new client
 const client = new Client(username, password)
 
-client.register(serverInfo, (err) => {
-  if (err) throw err
-  client.store(serverInfo, (err, str) => {
-    if (err) throw err
-    fs.createReadStream('./samples/1.txt').pipe(str)
-  })
-})
+// register with a server
+const serverInfo = await client.register(serverInfo)
+
+// store data with server
+const stream = await client.store(serverInfo)
+fs.createReadStream('./samples/1.txt').pipe(str)
+
+// sometime later //
+
+// retrieve data from server
+const backup = await client.retrieve(serverInfo)
+backup.pipe(process.stdout)
 ```
 
 ## API
@@ -42,11 +53,13 @@ Instantiate a new Host, with `id` given as a Buffer or Uint8Array.
 
 `storage` should be an [blob-store](https://github.com/maxogden/abstract-blob-store) compatible storage module provided by the application. User backups are stored here.
 
-#### ``const server = backpack.createServer(opts, onrequest)``
+#### ``const server = backpack.createServer(connect, opts)``
 
-Create a new server to listen for incoming connections. Default connection is made using `net.createServer`, but conncetion logic may be specified by `opts.connect`.
+Create a new server to listen for incoming connections. A method for connecting to clients must be specified by the `connect` parameter.
 
-`onrequest` should be a callback function specifying the RPC logic for the server. `onrequest` should have the signature: `function (req, channel, cb)`, and `cb` MUST be called after each request has finished 
+`connect` is used to instantiate the server, eg. `net.createServer`, and should return the server instance. See [examples](./examples) for usage. `connect` should take an `onconnection` handler as a callback.
+
+`opts` may be used to pass in `onrequest` and `onerror` handlers. `onrequest` should be a callback function specifying the RPC logic for the server. `onrequest` should have the signature: `function (req, channel, cb)`, and `cb` MUST be called after each request has finished.
 
 **NOTE**: for upload/download events, cb should be called AFTER the uploadl/download stream has fully closed.
 
@@ -72,16 +85,15 @@ Reads from `req` and stores the data under the user.
 
 ### Client
 
-#### `const user = new Client(username, password, opts)`
+#### `const user = new Client(username, password, [connect])`
 
 Instantiate a new client instance with the given `username` and `password`. `username` and `password` should be Buffers.
 
-Default connection logic for the client may be specified via `opts.connect`:
+Default connection logic for the client may be specified via the `connect` parameter:
 ```js
-{
-  connect: (serverInfo, cb) => {
-    // implement connection logic
-  }
+connect: (serverInfo, cb) => {
+  // implement connection logic
+  cb(err, stream)
 }
 ```
 

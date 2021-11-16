@@ -16,15 +16,15 @@ module.exports = class Host {
     this.storage = storage
   }
 
-  createServer (opts = {}, onrequest) {
+  createServer (connect, opts = {}) {
     const self = this
 
     const onerror = opts.onerror || throwMaybe
-    if (!onrequest) onrequest = rpc.bind(this)
+    const onrequest = (opts.onrequest || rpc).bind(this)
 
-    const connect = opts.connect
+    assert(connect, 'Must specify a conncetion method.')
 
-    return connect(socket => {
+    return connect((socket) => {
       read(socket, onmessage)
 
       function onmessage (msg) {
