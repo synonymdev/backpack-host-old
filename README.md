@@ -2,7 +2,7 @@
 
 *This is alpha software: this should __not__ be used in production and breaking changes may occur without warning*
 
-An encrypted backup service with using a Password-Authenticated Key Agreement based on SPAKE2+EE https://github.com/jedisct1/spake2-ee, meaning client's passwords are neither transmitted nor stored on the server.
+backpack-host is an encrypted backup service that uses a Password-Authenticated Key Agreement based on SPAKE2+EE https://github.com/jedisct1/spake2-ee, meaning client's passwords are neither transmitted nor stored on the server.
 
 ## Usage
 
