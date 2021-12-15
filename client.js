@@ -22,7 +22,8 @@ module.exports = function Client (username, password, connect) {
 
   async function init (opts = {}) {
     if (key !== null) return
-    key = await createKey(username, password, opts)
+    key = opts.key || await createKey(username, password, opts)
+    return key
   }
 
   function encryptBackup (plaintext, pad = 128) {
@@ -97,6 +98,8 @@ module.exports = function Client (username, password, connect) {
     })
   }
 }
+
+module.exports.createKey = createKey
 
 function frame (buf) {
   const ret = new Uint8Array(2 + buf.length)
