@@ -61,9 +61,9 @@ Create a new server to listen for incoming connections. A method for connecting 
 
 `opts` may be used to pass in `onrequest` and `onerror` handlers. `onrequest` should be a callback function specifying the RPC logic for the server. `onrequest` should have the signature: `function (req, channel, cb)`, and `cb` MUST be called after each request has finished.
 
-**NOTE**: for upload/download events, cb should be called AFTER the uploadl/download stream has fully closed.
+**NOTE**: for upload/download events, cb should be called AFTER the upload/download stream has fully closed.
 
-A defualt RPC provides the following methods:
+A default RPC provides the following methods:
 ```
 BACKPACK_STORE
 BACKPACK_RETRIEVE
